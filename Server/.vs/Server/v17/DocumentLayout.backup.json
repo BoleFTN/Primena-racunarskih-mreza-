@@ -1,15 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Fax\\Kolokvijumi i cuda za fax\\3 god\\1 semestar\\Mreze\\projekat\\Server\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{EEE43A00-C42B-4DD2-AE40-DAD2A99187FF}|Server.csproj|d:\\fax\\kolokvijumi i cuda za fax\\3 god\\1 semestar\\mreze\\projekat\\server\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EEE43A00-C42B-4DD2-AE40-DAD2A99187FF}|Server.csproj|solutionrelative:server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A6BC5867-10E0-4DD2-9523-7193BD225156}|..\\Client\\Client.csproj|d:\\fax\\kolokvijumi i cuda za fax\\3 god\\1 semestar\\mreze\\projekat\\client\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -17,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,36 +18,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Client.cs",
-              "DocumentMoniker": "D:\\Fax\\Kolokvijumi i cuda za fax\\3 god\\1 semestar\\Mreze\\projekat\\Client\\Client.cs",
-              "RelativeDocumentMoniker": "..\\Client\\Client.cs",
-              "ToolTip": "D:\\Fax\\Kolokvijumi i cuda za fax\\3 god\\1 semestar\\Mreze\\projekat\\Client\\Client.cs",
-              "RelativeToolTip": "..\\Client\\Client.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-02T23:36:54.221Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Server.cs",
-              "DocumentMoniker": "D:\\Fax\\Kolokvijumi i cuda za fax\\3 god\\1 semestar\\Mreze\\projekat\\Server\\Server.cs",
-              "RelativeDocumentMoniker": "Server.cs",
-              "ToolTip": "D:\\Fax\\Kolokvijumi i cuda za fax\\3 god\\1 semestar\\Mreze\\projekat\\Server\\Server.cs",
-              "RelativeToolTip": "Server.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-02T23:36:22.426Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
             }
           ]
         }
