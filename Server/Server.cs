@@ -15,37 +15,51 @@ namespace Server
     {
         //rad sa projektnim zadacima ide preko TCP-a
         //ostalo preko UDP-a
-        public Dictionary<string, List<ZadatakProjekta>> projekti = new Dictionary<string, List<ZadatakProjekta>>();
-        public string[] menadzeri = null;
+        public static Dictionary<string, List<ZadatakProjekta>> projekti = new Dictionary<string, List<ZadatakProjekta>>();
+        public static List<string> menadzeri = null;
         static void Main(string[] args)
         {
             Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
             ProtocolType.Udp);
-            IPEndPoint UDPserverEP = new IPEndPoint(IPAddress.Any, 5000);
-            UDPserverSocket.Bind(UDPserverEP);
+            IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 50000);
+            UDPserverSocket.Bind(serverEP);
 
-            EndPoint posiljaocEP = new IPEndPoint(IPAddress.Any, 0);
+            Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,ProtocolType.Tcp);
+            TCPserverSocket.Bind(serverEP);
+
+            EndPoint posiljaocKlijentEP = new IPEndPoint(IPAddress.Any, 50001);
+
+            byte[] prijemnik = new byte[2048];
+            try
+            {
+                int brBajta = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
+                string imePrijem = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
+                string ime = imePrijem.Split(':')[1];
+             
+                    //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
+                    menadzeri = File.ReadAllLines("menadzeri.txt").ToList();
+
+                    if (menadzeri.Contains(ime))
+                    {
+                        byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
+                        int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
+                    }
+                    else { 
+                    menadzeri.Add(ime);
+                    File.WriteAllLines("Menadzeri.txt", menadzeri);
+                    byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
+                    int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
+                    }
+                
+            }
+            catch
+            {
+
+            }
 
             while (true)
             {
-                byte[] prijemnik = new byte[2048];
-                try
-                {
-                    int brBajta = UDPserverSocket.ReceiveFrom(prijemnik,ref posiljaocEP);
-                    string ime = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
-
-                    if (File.Exists("Menadzeri.txt"))
-                    {
-                       //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
-                    }
-                    else
-                    {
-                        //kreirati Menadzeri.txt i dodati menadzera
-                    }
-                }
-                catch { 
-
-                }
+               
             }
         }
     }
