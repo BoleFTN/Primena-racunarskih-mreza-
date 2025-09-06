@@ -1,0 +1,11 @@
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\bin\Debug\Menadzer.exe.config
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\bin\Debug\Menadzer.exe
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\bin\Debug\Menadzer.pdb
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\bin\Debug\Biblioteka.dll
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\bin\Debug\Biblioteka.pdb
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.csproj.AssemblyReference.cache
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.csproj.CoreCompileInputs.cache
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.csproj.Up2Date
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.exe
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.pdb
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.exe.config

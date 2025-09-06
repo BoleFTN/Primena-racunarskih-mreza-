@@ -9,9 +9,12 @@ namespace Biblioteka
 
     [Serializable]
     public enum StanjeProjekta { naCekanju, uIzradi, zavrseno }
-    public class Projekat
+    public class ZadatakProjekta
     {
         public string NazivProjekta { get; set; }
+        public string Zaposleni { get; set; }
+        public string RokIzrade { get; set; }
+        public int prioritet { get; set; }
         public StanjeProjekta stanje { get; set; }
     }
 }
