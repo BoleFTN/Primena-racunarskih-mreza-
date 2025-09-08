@@ -9,3 +9,13 @@ D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\De
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.exe
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.pdb
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Menadzer\obj\Debug\Menadzer.exe.config
+D:\PROJEKAT_MREZE2\Menadzer\bin\Debug\Menadzer.exe.config
+D:\PROJEKAT_MREZE2\Menadzer\bin\Debug\Menadzer.exe
+D:\PROJEKAT_MREZE2\Menadzer\bin\Debug\Menadzer.pdb
+D:\PROJEKAT_MREZE2\Menadzer\bin\Debug\Biblioteka.dll
+D:\PROJEKAT_MREZE2\Menadzer\bin\Debug\Biblioteka.pdb
+D:\PROJEKAT_MREZE2\Menadzer\obj\Debug\Menadzer.csproj.AssemblyReference.cache
+D:\PROJEKAT_MREZE2\Menadzer\obj\Debug\Menadzer.csproj.CoreCompileInputs.cache
+D:\PROJEKAT_MREZE2\Menadzer\obj\Debug\Menadzer.csproj.Up2Date
+D:\PROJEKAT_MREZE2\Menadzer\obj\Debug\Menadzer.exe
+D:\PROJEKAT_MREZE2\Menadzer\obj\Debug\Menadzer.pdb
