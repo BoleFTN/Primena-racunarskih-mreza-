@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Menadzer
@@ -14,6 +15,8 @@ namespace Menadzer
         static void Main(string[] args)
         {
             Console.WriteLine("Menadzer krece sa radom...");
+            Thread.Sleep(2000); //Uspavljujemo zbog nepouzdanosti UDP-a, server mora da pocne da osluskuje pre nego sto Menadzer nesto posalje
+
             Socket UDPmenadzerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint UDPdestinationEP = new IPEndPoint(IPAddress.Loopback, 27015);
            // EndPoint serverEP = new IPEndPoint(IPAddress.Any, 50000);
@@ -49,8 +52,19 @@ namespace Menadzer
                 byte[] prijemniBuffer = new byte[1024];
                 int brBajta = UDPmenadzerSocket.ReceiveFrom(prijemniBuffer, ref serverEP);
                 string poruka_o_tcp_uticnici = Encoding.UTF8.GetString(prijemniBuffer, 0, brBajta);
-                Console.WriteLine($"Konektovanje sa serverom uspesno, port tcp uticnice je {poruka_o_tcp_uticnici}");
-               
+                Console.WriteLine($"Konektovanje sa serverom preko UDP uticnice uspesno, port tcp uticnice koji nam salje server je {poruka_o_tcp_uticnici}");
+
+                //Sada menadzer uspostavlja TCP vezu sa serverom
+                Socket TPCmenadzerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint TCPserverEP = new IPEndPoint(IPAddress.Loopback, 50001);
+                byte[] buffer = new byte[1024];
+
+            Console.WriteLine("Klijent je spreman za povezivanje sa serverom, kliknite enter");
+            Console.ReadKey();
+            TPCmenadzerSocket.Connect(TCPserverEP);
+            Console.WriteLine("Klijent je uspesno povezan sa serverom!");
+            //Sada menadzer salje objekat klase Projekat Serveru
+
         }
     }
 }

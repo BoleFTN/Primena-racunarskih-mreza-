@@ -21,46 +21,59 @@ namespace Server
         {
             Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
             ProtocolType.Udp);
-            IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 50000);
+            IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 27015);
             UDPserverSocket.Bind(serverEP);
 
-            Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,ProtocolType.Tcp);
-            TCPserverSocket.Bind(serverEP);
+            /*Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,ProtocolType.Tcp);
+            TCPserverSocket.Bind(serverEP);*/
 
-            EndPoint posiljaocKlijentEP = new IPEndPoint(IPAddress.Any, 50001);
+            EndPoint posiljaocKlijentEP = new IPEndPoint(IPAddress.Any, 0);
 
             byte[] prijemnik = new byte[2048];
             try
-            {
-                int brBajta = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
-                string imePrijem = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
-                string ime = imePrijem.Split(':')[1];
-             
+                {
+                    int brBajta = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
+                    Console.WriteLine($"Server prima poruku od {posiljaocKlijentEP}");
+                    string ime = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
+                    //string ime = imePrijem.Split(':')[1];
+
                     //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
-                    menadzeri = File.ReadAllLines("menadzeri.txt").ToList();
+                    menadzeri = File.ReadAllLines("D:\\PROJEKAT_MREZE2\\Menadzer\\bin\\Debug\\Menadzer.txt").ToList();
 
                     if (menadzeri.Contains(ime))
                     {
                         byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
                         int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
                     }
-                    else { 
-                    menadzeri.Add(ime);
-                    File.WriteAllLines("Menadzeri.txt", menadzeri);
-                    byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
-                    int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
+                    else
+                    {
+                        menadzeri.Add(ime);
+                        File.WriteAllLines("D:\\PROJEKAT_MREZE2\\Menadzer\\bin\\Debug\\Menadzer.txt", menadzeri);
+                        byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
+                        int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
                     }
-                
-            }
-            catch
-            {
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine("recvfrom failed with error: {0}", ex.Message);
+                }
+            //Uspostavljanje TCP konekcije sa klijentom
+            Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint TCPserverEP = new IPEndPoint(IPAddress.Any, 50001);
 
-            }
+            TCPserverSocket.Bind(TCPserverEP);
 
-            while (true)
-            {
-               
-            }
+            TCPserverSocket.Listen(5);
+
+            Console.WriteLine($"Server je stavljen u stanje osluskivanja i ocekuje komunikaciju na {TCPserverEP}");
+
+            Socket acceptedSocket = TCPserverSocket.Accept();
+
+            IPEndPoint clientEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
+            Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {clientEP}");
+
+
+
         }
     }
 }
