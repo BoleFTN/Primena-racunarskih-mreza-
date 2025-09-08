@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using Biblioteka;
 namespace Menadzer
 {
     public class Menadzer
@@ -64,7 +67,30 @@ namespace Menadzer
             TPCmenadzerSocket.Connect(TCPserverEP);
             Console.WriteLine("Klijent je uspesno povezan sa serverom!");
             //Sada menadzer salje objekat klase Projekat Serveru
+            BinaryFormatter formatter = new BinaryFormatter();
+            Console.WriteLine("Unesite naziv projekta: ");
+            string nazivProjekta = Console.ReadLine();
+            Console.WriteLine("Unesite ime zaposlenog: ");
+            string imeZaposlenog = Console.ReadLine();
+            Console.WriteLine("Unesite rok izrade: ");
+            string rokIzrade = Console.ReadLine();
+            Console.WriteLine("Unesite prioritet: ");
+            int prioritet = int.Parse(Console.ReadLine());
+            ZadatakProjekta zp = new ZadatakProjekta
+            {
+                NazivProjekta = nazivProjekta,
+                Zaposleni = imeZaposlenog,
+                RokIzrade = rokIzrade,
+                prioritet = prioritet,
+                stanje = StanjeProjekta.naCekanju
+            };
+            using (MemoryStream ms = new MemoryStream())
+            {
+                formatter.Serialize(ms, zp);
+                byte[] data = ms.ToArray();
 
+                TPCmenadzerSocket.Send(data);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using Biblioteka;
 namespace Server
 {
     public class Server
@@ -38,7 +38,7 @@ namespace Server
                     //string ime = imePrijem.Split(':')[1];
 
                     //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
-                    menadzeri = File.ReadAllLines("D:\\PROJEKAT_MREZE2\\Menadzer\\bin\\Debug\\Menadzer.txt").ToList();
+                    menadzeri = File.ReadAllLines("Menadzer.txt").ToList();
 
                     if (menadzeri.Contains(ime))
                     {
@@ -48,7 +48,7 @@ namespace Server
                     else
                     {
                         menadzeri.Add(ime);
-                        File.WriteAllLines("D:\\PROJEKAT_MREZE2\\Menadzer\\bin\\Debug\\Menadzer.txt", menadzeri);
+                        File.WriteAllLines("Menadzer.txt", menadzeri);
                         byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
                         int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
                     }
@@ -69,9 +69,9 @@ namespace Server
 
             Socket acceptedSocket = TCPserverSocket.Accept();
 
-            IPEndPoint clientEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
-            Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {clientEP}");
-
+            IPEndPoint menadzerEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
+            Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {menadzerEP}");
+            //Treba sad da primi poslat objekat od strane Menadzera
 
 
         }
