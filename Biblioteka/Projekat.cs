@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 namespace Biblioteka
 {
 
-    [Serializable]
+
     public enum StanjeProjekta { naCekanju, uIzradi, zavrseno }
+
+    [Serializable]
     public class ZadatakProjekta
     {
         public string NazivProjekta { get; set; }

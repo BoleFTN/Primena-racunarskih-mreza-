@@ -1,21 +1,22 @@
 ﻿using Biblioteka;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using Biblioteka;
 namespace Server
 {
     public class Server
     {
         //rad sa projektnim zadacima ide preko TCP-a
         //ostalo preko UDP-a
-        public static Dictionary<string, List<ZadatakProjekta>> projekti = new Dictionary<string, List<ZadatakProjekta>>();
+        public static List<ZadatakProjekta> projekti = new List<ZadatakProjekta>();
         public static List<string> menadzeri = null;
         static void Main(string[] args)
         {
@@ -72,7 +73,39 @@ namespace Server
             IPEndPoint menadzerEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
             Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {menadzerEP}");
             //Treba sad da primi poslat objekat od strane Menadzera
+            int opcija;
+            while (true) {
+            int brBajta = acceptedSocket.ReceiveFrom(prijemnik,ref posiljaocKlijentEP) ;
+            opcija =int.Parse( Encoding.UTF8.GetString(prijemnik,0,brBajta));
 
+                if (opcija == 1)
+                {
+                    int brBajtaObjekat = acceptedSocket.Receive(prijemnik);
+                    using (MemoryStream ms = new MemoryStream(prijemnik, 0, brBajtaObjekat))
+                    {
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
+                        projekti.Add(zp);
+                    }
+                }
+                else if (opcija == 2)
+                {
+                    using (MemoryStream ms = new MemoryStream()) {
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        formatter.Serialize(ms,projekti);
+                        byte[] data = ms.ToArray();
+
+                        acceptedSocket.Send(data);
+                    }
+                }
+                else if (opcija == 0)
+                {
+                    break;
+                }
+                else {
+                    break;
+                }
+            }
 
         }
     }
