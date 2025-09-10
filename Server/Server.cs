@@ -18,6 +18,7 @@ namespace Server
         //ostalo preko UDP-a
         public static List<ZadatakProjekta> projekti = new List<ZadatakProjekta>();
         public static List<string> menadzeri = null;
+        public static Dictionary<string,List<ZadatakProjekta>> projektiZaMenadzera = new Dictionary<string, List<ZadatakProjekta>>();
         static void Main(string[] args)
         {
             Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
@@ -31,11 +32,12 @@ namespace Server
             EndPoint posiljaocKlijentEP = new IPEndPoint(IPAddress.Any, 0);
 
             byte[] prijemnik = new byte[2048];
+            string ime="";
             try
                 {
                     int brBajta = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
                     Console.WriteLine($"Server prima poruku od {posiljaocKlijentEP}");
-                    string ime = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
+                    ime = Encoding.UTF8.GetString(prijemnik, 0, brBajta);
                     //string ime = imePrijem.Split(':')[1];
 
                     //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
@@ -74,6 +76,9 @@ namespace Server
             Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {menadzerEP}");
             //Treba sad da primi poslat objekat od strane Menadzera
             int opcija;
+
+            projektiZaMenadzera.Add(ime, projekti);  //iniccijalizacija recnika
+
             while (true) {
             int brBajta = acceptedSocket.ReceiveFrom(prijemnik,ref posiljaocKlijentEP) ;
             opcija =int.Parse( Encoding.UTF8.GetString(prijemnik,0,brBajta));
@@ -87,6 +92,8 @@ namespace Server
                         ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
                         projekti.Add(zp);
                     }
+                    
+                    projektiZaMenadzera[ime] = projekti;
                 }
                 else if (opcija == 2)
                 {
