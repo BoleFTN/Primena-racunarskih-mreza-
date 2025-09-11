@@ -12,3 +12,16 @@ D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Client\obj\Debu
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Client\obj\Debug\Client.exe
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Client\obj\Debug\Client.pdb
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Client\obj\Debug\Client.exe.config
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Client.exe.config
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Client.exe
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Client.pdb
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Biblioteka.dll
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Menadzer.exe
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Biblioteka.pdb
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Menadzer.pdb
+D:\PROJEKAT_MREZE4\Client\bin\Debug\Menadzer.exe.config
+D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.csproj.AssemblyReference.cache
+D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.csproj.Up2Date
+D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.exe
+D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.pdb

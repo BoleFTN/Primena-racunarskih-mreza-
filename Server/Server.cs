@@ -77,11 +77,11 @@ namespace Server
             //Treba sad da primi poslat objekat od strane Menadzera
             int opcija;
 
-            projektiZaMenadzera.Add(ime, projekti);  //iniccijalizacija recnika
+            projektiZaMenadzera.Add(ime, projekti);  //inicijalizacija recnika
 
             while (true) {
-            int brBajta = acceptedSocket.ReceiveFrom(prijemnik,ref posiljaocKlijentEP) ;
-            opcija =int.Parse( Encoding.UTF8.GetString(prijemnik,0,brBajta));
+            int brBajta = acceptedSocket.Receive(prijemnik);
+            opcija =int.Parse( Encoding.UTF8.GetString(prijemnik));
 
                 if (opcija == 1)
                 {
