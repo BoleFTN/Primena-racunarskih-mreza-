@@ -77,9 +77,14 @@ namespace Menadzer
                 Console.WriteLine("2-izlistajte projekte");
 
                 opcija = int.Parse(Console.ReadLine());
-
-                byte[] opcijaBinarno = Encoding.UTF8.GetBytes(opcija.ToString());
-                TPCmenadzerSocket.Send(opcijaBinarno);
+                try
+                {
+                    byte[] opcijaBinarno = Encoding.UTF8.GetBytes(opcija.ToString());
+                    TPCmenadzerSocket.Send(opcijaBinarno);
+                }
+                catch {
+                    opcija = -1;
+                }
                 if (opcija == 1)
                 {
                     BinaryFormatter formatter = new BinaryFormatter();

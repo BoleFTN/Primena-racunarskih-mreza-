@@ -20,9 +20,10 @@ namespace Client
         static void Main(string[] args)
         {
             Console.WriteLine("Zaposleni krece sa radom...");
-            Thread.Sleep(2000); //Uspavljujemo zbog nepouzdanosti UDP-a, server mora da pocne da osluskuje pre nego sto Zaposleni nesto posalje
+            Thread.Sleep(3000); //Uspavljujemo zbog nepouzdanosti UDP-a, server mora da pocne da osluskuje pre nego sto Zaposleni nesto posalje
 
             Socket UDPZaposleniSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            Socket TCPZaposleniSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint UDPdestinationEP = new IPEndPoint(IPAddress.Loopback, 27015);
             EndPoint serverEP = new IPEndPoint(IPAddress.Any, 0);
 

@@ -25,7 +25,7 @@ namespace Server
             ProtocolType.Udp);
             IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 27015);
             UDPserverSocket.Bind(serverEP);
-
+            //UDPserverSocket.Blocking = false;
             /*Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,ProtocolType.Tcp);
             TCPserverSocket.Bind(serverEP);*/
 
@@ -65,13 +65,15 @@ namespace Server
             IPEndPoint TCPserverEP = new IPEndPoint(IPAddress.Any, 50001);
 
             TCPserverSocket.Bind(TCPserverEP);
-
+            //TCPserverSocket.Blocking = false;
             TCPserverSocket.Listen(5);
 
             Console.WriteLine($"Server je stavljen u stanje osluskivanja i ocekuje komunikaciju na {TCPserverEP}");
+            Socket acceptedSocket;
 
-            Socket acceptedSocket = TCPserverSocket.Accept();
-
+            acceptedSocket = TCPserverSocket.Accept();
+            //acceptedSocket.Blocking = false;
+            
             IPEndPoint menadzerEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
             Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {menadzerEP}");
             //Treba sad da primi poslat objekat od strane Menadzera
@@ -80,8 +82,14 @@ namespace Server
             projektiZaMenadzera.Add(ime, projekti);  //inicijalizacija recnika
 
             while (true) {
-            int brBajta = acceptedSocket.Receive(prijemnik);
-            opcija =int.Parse( Encoding.UTF8.GetString(prijemnik));
+                if (acceptedSocket != null && acceptedSocket.Poll(1000 * 1000, SelectMode.SelectRead))
+                {
+                    int brBajta = acceptedSocket.Receive(prijemnik);
+                    opcija = int.Parse(Encoding.UTF8.GetString(prijemnik, 0, brBajta));
+                }
+                else { 
+                    opcija = -1;
+                }
 
                 if (opcija == 1)
                 {
@@ -105,6 +113,7 @@ namespace Server
                         acceptedSocket.Send(data);
                     }
                 }
+
                 else if (opcija == 0)
                 {
                     break;
