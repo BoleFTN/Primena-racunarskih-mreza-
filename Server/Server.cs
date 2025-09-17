@@ -156,7 +156,7 @@ namespace Server
                                 if (int.TryParse(message, out int opcija))
                                 {
                                     Console.WriteLine($"Primljena opcija {opcija} od {client.RemoteEndPoint}");
-                                    
+                                    Thread.Sleep(7000);
                                     if (opcija == 1)
                                     {
                                         Console.WriteLine("Server prima projekat od menadzera");
@@ -168,6 +168,9 @@ namespace Server
                                             BinaryFormatter formatter = new BinaryFormatter();
                                             ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
                                             projekti.Add(zp);
+                                            Console.WriteLine("Primljen projekat:");
+                                            Console.WriteLine($"Naziv projekta: {zp.NazivProjekta}, Zaposleni: {zp.Zaposleni}, Rok izrade: {zp.RokIzrade}, " +
+                                                $"Prioritet: {zp.prioritet},  Stanje: {zp.stanje}");
                                         }
                                     }
                                     else if (opcija == 2)
