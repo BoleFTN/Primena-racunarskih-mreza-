@@ -19,31 +19,30 @@ namespace Menadzer
         static void Main(string[] args)
         {
             Console.WriteLine("Menadzer krece sa radom...");
-            Thread.Sleep(2000); //Uspavljujemo zbog nepouzdanosti UDP-a, server mora da pocne da osluskuje pre nego sto Menadzer nesto posalje
-
+            Thread.Sleep(3000); //Uspavljujemo zbog nepouzdanosti UDP-a, server mora da pocne da osluskuje pre nego sto Menadzer nesto posalje
+            
             Socket UDPmenadzerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint UDPdestinationEP = new IPEndPoint(IPAddress.Loopback, 27015);
             EndPoint serverEP = new IPEndPoint(IPAddress.Any, 0);
-
-                string ImeMenadzera = "";
+            
+            string ImeMenadzera = "";
                 if (File.Exists("Menadzer.txt"))
                 {
-                    //u Menadzer.txt se cuva ulogovani korisnik
-                    ImeMenadzera = File.ReadAllText("Menadzer.txt");
+                //u Menadzer.txt se cuva ulogovani korisnik
+                ImeMenadzera = File.ReadAllText("Menadzer.txt");
                     if (ImeMenadzera.Trim().Equals(string.Empty))
                     {
                         Console.WriteLine("Unesite vase korisnicko ime da bi ste dobili uticnicu za rad u formatu MENADZER:[VASE IME]");
                         ImeMenadzera = Console.ReadLine();
                     }
                     //sada prosledi ImeMenadzera serveru i trebalo bi da dobijes koju tcp uticnicu koristis
-
                     byte[] enkriptovanaPoruka = Encoding.UTF8.GetBytes(ImeMenadzera);
                     int slanje = UDPmenadzerSocket.SendTo(enkriptovanaPoruka, 0, enkriptovanaPoruka.Length, SocketFlags.None, UDPdestinationEP);
-
                 }
                 else
                 {
-                    Console.WriteLine("Unesite vase korisnicko ime u formatu MENADZER:[VASE IME]");
+
+                Console.WriteLine("Unesite vase korisnicko ime u formatu MENADZER:[VASE IME]");
                     ImeMenadzera = Console.ReadLine();
                     File.WriteAllText("Menadzer.txt", ImeMenadzera);
                     //poslati serveru username da bi dobili uticnicu
