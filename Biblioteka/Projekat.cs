@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Biblioteka
 {
 
-
+    [Serializable]
     public enum StanjeProjekta { naCekanju, uIzradi, zavrseno }
 
     [Serializable]

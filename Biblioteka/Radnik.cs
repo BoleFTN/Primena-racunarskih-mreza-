@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Biblioteka
 {
-
+    [Serializable]
     public class Radnik
     {
         public string Ime { get; set; }

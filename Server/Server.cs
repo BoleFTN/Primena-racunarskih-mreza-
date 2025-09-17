@@ -7,193 +7,250 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 namespace Server
 {
     public class Server
     {
-        //rad sa projektnim zadacima ide preko TCP-a
-        //ostalo preko UDP-a
-        
         public static List<ZadatakProjekta> projekti = new List<ZadatakProjekta>();
-        public static List<string> menadzeri = null;
-        public static Dictionary<string,List<ZadatakProjekta>> projektiZaMenadzera = new Dictionary<string, List<ZadatakProjekta>>();
+        public static List<string> menadzeri = new List<string>();
+        
         static void Main(string[] args)
         {
-            int brKorisnika = 5;
+            Console.WriteLine("Server se pokreće...");
+            
+            // UDP socket za početnu autentifikaciju
+            Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPEndPoint UDPserverEP = new IPEndPoint(IPAddress.Any, 27015);
+            UDPserverSocket.Bind(UDPserverEP);
+            UDPserverSocket.Blocking = false;
 
-            Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
-            ProtocolType.Udp);
-            IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 27015);
-            UDPserverSocket.Bind(serverEP);
-
-            //UDPserverSocket.Blocking = false;
-
-            /*Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,ProtocolType.Tcp);
-            TCPserverSocket.Bind(serverEP);*/
+            // TCP socket za glavnu komunikaciju
             Socket TCPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint TCPserverEP = new IPEndPoint(IPAddress.Any, 50001);
-
             TCPserverSocket.Bind(TCPserverEP);
             TCPserverSocket.Blocking = false;
             TCPserverSocket.Listen(5);
 
+            Console.WriteLine($"UDP Server pokrenut na portu {UDPserverEP.Port}");
+            Console.WriteLine($"TCP Server pokrenut na portu {TCPserverEP.Port}");
 
+            List<Socket> tcpClients = new List<Socket>();
 
-            EndPoint posiljaocKlijentEP = new IPEndPoint(IPAddress.Any, 0);
+            // Učitaj postojeće menadžere
+            if (File.Exists("Menadzer.txt"))
+            {
+                try
+                {
+                    menadzeri = File.ReadAllLines("Menadzer.txt").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                    Console.WriteLine($"Učitano {menadzeri.Count} menadžera iz fajla");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Greška pri učitavanju menadžera: {ex.Message}");
+                    menadzeri = new List<string>();
+                }
+            }
 
-            byte[] prijemnik = new byte[2048];
-            string ime = "";
-
-            //Treba sad da primi poslat objekat od strane Menadzera
-            int opcija;
-
-            projektiZaMenadzera.Add(ime, projekti);  //inicijalizacija recnika
-            List<Socket> users = new List<Socket>();
-            //List<Socket> usersUDP = new List<Socket>();
             while (true)
             {
                 List<Socket> checkRead = new List<Socket>();
                 List<Socket> checkError = new List<Socket>();
 
-                //List<Socket> checkReadUDP = new List<Socket>();
-                //List<Socket> checkErrorUDP = new List<Socket>();
-
-                if (users.Count < brKorisnika)
-                {
-                    users.Add(TCPserverSocket);
-                }
-                checkError.Add(TCPserverSocket);
-                users.Add(UDPserverSocket); 
+                checkRead.Add(UDPserverSocket);
+                checkRead.Add(TCPserverSocket);
                 checkError.Add(UDPserverSocket);
-                //  if (usersUDP.Count < brKorisnika) { 
-                //usersUDP.Add(UDPserverSocket);
-                // }
-                //checkErrorUDP.Add(UDPserverSocket);
+                checkError.Add(TCPserverSocket);
 
-                foreach (Socket acceptedSocket in users)
+                foreach (Socket client in tcpClients.ToList())
                 {
-                    checkRead.Add(acceptedSocket);
-                    checkError.Add(acceptedSocket);
+                    checkRead.Add(client);
+                    checkError.Add(client);
                 }
 
-                // foreach (Socket acceptedSocketUDP in usersUDP) { 
-                //   checkReadUDP.Add(acceptedSocketUDP);
-                //   checkErrorUDP.Add(acceptedSocketUDP);
-                //}
-
-                
-            // Socket.Select(checkReadUDP, null, checkError, 1000);
-            
-                Socket.Select(checkRead, null, checkError, 1000);
-                if (checkRead.Count > 0)
+                try
                 {
-                   
-                        foreach (Socket acceptedSocket in checkRead)
-                        {
+                    Socket.Select(checkRead, null, checkError, 1000);
 
-                            if (acceptedSocket == TCPserverSocket)
+                    // UDP komunikacija (autentifikacija)
+                    if (checkRead.Contains(UDPserverSocket))
+                    {
+                        try
+                        {
+                            EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
+                            byte[] buffer = new byte[1024];
+                            int bytes = UDPserverSocket.ReceiveFrom(buffer, ref clientEP);
+                            string ime = Encoding.UTF8.GetString(buffer, 0, bytes);
+                            
+                            Console.WriteLine($"UDP: Primljen zahtev za autentifikaciju od '{ime}'");
+
+                            if (!menadzeri.Contains(ime))
                             {
-                                Socket client = TCPserverSocket.Accept();
-                                client.Blocking = false;
-                                users.Add(client);
+                                menadzeri.Add(ime);
+                                try
+                                {
+                                    File.WriteAllLines("Menadzer.txt", menadzeri);
+                                    Console.WriteLine($"Dodat novi menadžer: {ime}");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Greška pri čuvanju menadžera: {ex.Message}");
+                                }
                             }
 
+                            byte[] response = Encoding.UTF8.GetBytes("50001");
+                            UDPserverSocket.SendTo(response, clientEP);
+                            Console.WriteLine($"Poslat TCP port 50001 menadžeru {ime}");
+                        }
+                        catch (SocketException ex)
+                        {
+                            if (ex.SocketErrorCode != SocketError.WouldBlock)
+                            {
+                                Console.WriteLine($"UDP greška: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    // TCP nove konekcije
+                    if (checkRead.Contains(TCPserverSocket))
+                    {
+                        try
+                        {
+                            Socket newClient = TCPserverSocket.Accept();
+                            newClient.Blocking = false;
+                            tcpClients.Add(newClient);
+                            Console.WriteLine($"Nova TCP konekcija: {newClient.RemoteEndPoint}");
+                        }
+                        catch (SocketException ex)
+                        {
+                            if (ex.SocketErrorCode != SocketError.WouldBlock)
+                            {
+                                Console.WriteLine($"TCP Accept greška: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    // TCP poruke od klijenata
+                    List<Socket> clientsToRemove = new List<Socket>();
+                    foreach (Socket client in tcpClients.ToList())
+                    {
+                        if (checkRead.Contains(client))
+                        {
                             try
                             {
-                                int brBajtaKorisnik = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
-                                Console.WriteLine($"Server prima poruku od {posiljaocKlijentEP}");
-                                ime = Encoding.UTF8.GetString(prijemnik, 0, brBajtaKorisnik);
-                                //ime = ime.TrimStart("Menadzer");
-
-
-
-                                //iscitati sve menadzere iz fajla i potvrditi da menadzer kojeg saljes postoji
-                                menadzeri = File.ReadAllLines("Menadzer.txt").ToList();
-
-                                if (menadzeri.Contains(ime))
+                                byte[] buffer = new byte[1024];
+                                int bytes = client.Receive(buffer);
+                                
+                                if (bytes == 0)
                                 {
-                                    byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
-                                    int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
+                                    Console.WriteLine($"Klijent {client.RemoteEndPoint} se diskonektovao");
+                                    clientsToRemove.Add(client);
+                                    continue;
+                                }
+
+                                string message = Encoding.UTF8.GetString(buffer, 0, bytes);
+                                Console.WriteLine($"Primljena poruka: '{message}' od {client.RemoteEndPoint}");
+                                
+                                if (int.TryParse(message, out int opcija))
+                                {
+                                    Console.WriteLine($"Primljena opcija {opcija} od {client.RemoteEndPoint}");
+                                    
+                                    if (opcija == 1)
+                                    {
+                                        Console.WriteLine("Server prima projekat od menadzera");
+                                        byte[] bufferProj = new byte[1024];
+                                        // primi objekat
+                                        int brBajtaObjekat = client.Receive(bufferProj);
+                                        using (MemoryStream ms = new MemoryStream(bufferProj, 0, brBajtaObjekat))
+                                        {
+                                            BinaryFormatter formatter = new BinaryFormatter();
+                                            ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
+                                            projekti.Add(zp);
+                                        }
+                                    }
+                                    else if (opcija == 2)
+                                    {
+                                        Console.WriteLine($"Šaljem listu od {projekti.Count} projekata...");
+                                        
+                                        try
+                                        {
+                                            using (MemoryStream ms = new MemoryStream())
+                                            {
+                                                BinaryFormatter formatter = new BinaryFormatter();
+                                                formatter.Serialize(ms, projekti);
+                                                byte[] data = ms.ToArray();
+                                                
+                                                // Prvo pošalji dužinu podataka
+                                                byte[] lengthBytes = BitConverter.GetBytes(data.Length);
+                                                client.Send(lengthBytes);
+                                                
+                                                // Zatim pošalji podatke
+                                                int totalSent = 0;
+                                                while (totalSent < data.Length)
+                                                {
+                                                    int sent = client.Send(data, totalSent, data.Length - totalSent, SocketFlags.None);
+                                                    totalSent += sent;
+                                                }
+                                                
+                                                Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"Greška pri serijalizaciji liste: {ex.Message}");
+                                        }
+                                    }
+                                    else if (opcija == 0)
+                                    {
+                                        Console.WriteLine($"Klijent {client.RemoteEndPoint} izlazi");
+                                        clientsToRemove.Add(client);
+                                    }
                                 }
                                 else
                                 {
-                                    menadzeri.Add(ime);
-                                    File.WriteAllLines("Menadzer.txt", menadzeri);
-                                    byte[] enkriptovanaTCPuticnica = Encoding.UTF8.GetBytes("50001");
-                                    int slanje = UDPserverSocket.SendTo(enkriptovanaTCPuticnica, 0, enkriptovanaTCPuticnica.Length, SocketFlags.None, posiljaocKlijentEP);
+                                    Console.WriteLine($"Nevalidna opcija primljena: '{message}'");
                                 }
                             }
                             catch (SocketException ex)
                             {
-                                Console.WriteLine("recvfrom failed with error: {0}", ex.Message);
-                            }
-                            //Uspostavljanje TCP konekcije sa klijentom
-
-
-                            Console.WriteLine($"Server je stavljen u stanje osluskivanja i ocekuje komunikaciju na {TCPserverEP}");
-                            //Socket acceptedSocket;
-
-                            //acceptedSocket = TCPserverSocket.Accept();
-                            //acceptedSocket.Blocking = false;
-
-                            // IPEndPoint menadzerEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
-                            //Console.WriteLine($"Povezao se novi klijent! Njegova adresa je {menadzerEP}");
-
-
-                            int brBajta = UDPserverSocket.ReceiveFrom(prijemnik, ref posiljaocKlijentEP);
-                            if (int.TryParse(Encoding.UTF8.GetString(prijemnik, 0, brBajta), out opcija))
-                            {
-                                Console.WriteLine($"Primljena opcija {opcija} od strane menadzera {ime}");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Greska pri konverziji opcije");
-                                opcija = -1;
-                            }
-
-                            if (opcija == 1)
-                            {
-                                Console.WriteLine("Server prima projekat od menadzera");
-                                int brBajtaObjekat = acceptedSocket.Receive(prijemnik);
-                                using (MemoryStream ms = new MemoryStream(prijemnik, 0, brBajtaObjekat))
+                                if (ex.SocketErrorCode == SocketError.WouldBlock)
                                 {
-                                    BinaryFormatter formatter = new BinaryFormatter();
-                                    ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
-                                    projekti.Add(zp);
+                                    continue;
                                 }
-
-                                projektiZaMenadzera[ime] = projekti;
-                            }
-                            else if (opcija == 2)
-                            {
-                                Console.WriteLine("Test");
-                                using (MemoryStream ms = new MemoryStream())
+                                else if (ex.SocketErrorCode == SocketError.ConnectionReset || ex.SocketErrorCode == SocketError.ConnectionAborted)
                                 {
-                                    BinaryFormatter formatter = new BinaryFormatter();
-                                    formatter.Serialize(ms, projekti);
-                                    byte[] data = ms.ToArray();
-
-                                    acceptedSocket.Send(data);
+                                    Console.WriteLine($"Klijent {client.RemoteEndPoint} je prekinuo konekciju");
+                                    clientsToRemove.Add(client);
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"TCP greška: {ex.Message}");
+                                    clientsToRemove.Add(client);
                                 }
                             }
-
-                            else if (opcija == 0)
+                            catch (Exception ex)
                             {
-                                break;
+                                Console.WriteLine($"Opšta greška: {ex.Message}");
+                                clientsToRemove.Add(client);
                             }
-
                         }
                     }
+
+                    // Ukloni diskonektovane klijente
+                    foreach (Socket client in clientsToRemove)
+                    {
+                        tcpClients.Remove(client);
+                        try { client.Close(); } catch { }
+                    }
                 }
-            
-
-        
-
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Glavna greška: {ex.Message}");
+                    Thread.Sleep(1000);
+                }
+            }
         }
     }
 }
-
