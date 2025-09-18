@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -16,11 +17,11 @@ namespace Server
     {
         public static List<ZadatakProjekta> projekti = new List<ZadatakProjekta>();
         public static List<string> menadzeri = new List<string>();
-        
+
         static void Main(string[] args)
         {
             Console.WriteLine("Server se pokreće...");
-            
+
             // UDP socket za početnu autentifikaciju
             Socket UDPserverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint UDPserverEP = new IPEndPoint(IPAddress.Any, 27015);
@@ -83,7 +84,7 @@ namespace Server
                             byte[] buffer = new byte[1024];
                             int bytes = UDPserverSocket.ReceiveFrom(buffer, ref clientEP);
                             string ime = Encoding.UTF8.GetString(buffer, 0, bytes);
-                            
+
                             Console.WriteLine($"UDP: Primljen zahtev za autentifikaciju od '{ime}'");
 
                             if (!menadzeri.Contains(ime))
@@ -142,7 +143,7 @@ namespace Server
                             {
                                 byte[] buffer = new byte[1024];
                                 int bytes = client.Receive(buffer);
-                                
+
                                 if (bytes == 0)
                                 {
                                     Console.WriteLine($"Klijent {client.RemoteEndPoint} se diskonektovao");
@@ -152,70 +153,113 @@ namespace Server
 
                                 string message = Encoding.UTF8.GetString(buffer, 0, bytes);
                                 Console.WriteLine($"Primljena poruka: '{message}' od {client.RemoteEndPoint}");
-                                
-                                if (int.TryParse(message, out int opcija))
+                                Thread.Sleep(7000);
+                                if (message == "1->ZAPOSLENI")
                                 {
-                                    Console.WriteLine($"Primljena opcija {opcija} od {client.RemoteEndPoint}");
-                                    Thread.Sleep(7000);
-                                    if (opcija == 1)
+                                    Console.WriteLine($"Šaljem listu od {projekti.Count} projekata...");
+
+                                    try
                                     {
-                                        Console.WriteLine("Server prima projekat od menadzera");
-                                        byte[] bufferProj = new byte[1024];
-                                        // primi objekat
-                                        int brBajtaObjekat = client.Receive(bufferProj);
-                                        using (MemoryStream ms = new MemoryStream(bufferProj, 0, brBajtaObjekat))
+                                        using (MemoryStream ms = new MemoryStream())
                                         {
                                             BinaryFormatter formatter = new BinaryFormatter();
-                                            ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
-                                            projekti.Add(zp);
-                                            Console.WriteLine("Primljen projekat:");
-                                            Console.WriteLine($"Naziv projekta: {zp.NazivProjekta}, Zaposleni: {zp.Zaposleni}, Rok izrade: {zp.RokIzrade}, " +
-                                                $"Prioritet: {zp.prioritet},  Stanje: {zp.stanje}");
-                                        }
-                                    }
-                                    else if (opcija == 2)
-                                    {
-                                        Console.WriteLine($"Šaljem listu od {projekti.Count} projekata...");
-                                        
-                                        try
-                                        {
-                                            using (MemoryStream ms = new MemoryStream())
+                                            formatter.Serialize(ms, projekti);
+                                            byte[] data = ms.ToArray();
+
+                                            // Prvo pošalji dužinu podataka
+                                            byte[] lengthBytes = BitConverter.GetBytes(data.Length);
+                                            client.Send(lengthBytes);
+
+                                            // Zatim pošalji podatke
+                                            int totalSent = 0;
+                                            while (totalSent < data.Length)
                                             {
-                                                BinaryFormatter formatter = new BinaryFormatter();
-                                                formatter.Serialize(ms, projekti);
-                                                byte[] data = ms.ToArray();
-                                                
-                                                // Prvo pošalji dužinu podataka
-                                                byte[] lengthBytes = BitConverter.GetBytes(data.Length);
-                                                client.Send(lengthBytes);
-                                                
-                                                // Zatim pošalji podatke
-                                                int totalSent = 0;
-                                                while (totalSent < data.Length)
-                                                {
-                                                    int sent = client.Send(data, totalSent, data.Length - totalSent, SocketFlags.None);
-                                                    totalSent += sent;
-                                                }
-                                                
-                                                Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
+                                                int sent = client.Send(data, totalSent, data.Length - totalSent, SocketFlags.None);
+                                                totalSent += sent;
                                             }
+
+                                            Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
                                         }
-                                        catch (Exception ex)
-                                        {
-                                            Console.WriteLine($"Greška pri serijalizaciji liste: {ex.Message}");
-                                        }
+
                                     }
-                                    else if (opcija == 0)
+                                    catch (Exception ex)
                                     {
-                                        Console.WriteLine($"Klijent {client.RemoteEndPoint} izlazi");
-                                        clientsToRemove.Add(client);
+                                        Console.WriteLine($"Greška pri serijalizaciji liste: {ex.Message}");
                                     }
+                                }
+                                else if (message == "0->ZAPOSLENI")
+                                {
+                                    Console.WriteLine($"Klijent {client.RemoteEndPoint} izlazi");
+                                    clientsToRemove.Add(client);
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"Nevalidna opcija primljena: '{message}'");
+                                    if (int.TryParse(message, out int opcija))
+                                    {
+                                        Console.WriteLine($"Primljena opcija {opcija} od {client.RemoteEndPoint}");
+
+                                        if (opcija == 1)
+                                        {
+                                            Console.WriteLine("Server prima projekat od menadzera");
+
+                                            // primi objekat
+                                            int brBajtaObjekat = client.Receive(buffer);
+                                            using (MemoryStream ms = new MemoryStream(buffer, 0, brBajtaObjekat))
+                                            {
+                                                BinaryFormatter formatter = new BinaryFormatter();
+                                                ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
+                                                projekti.Add(zp);
+                                                Console.WriteLine("Primljen projekat:");
+                                                Console.WriteLine($"Naziv projekta: {zp.NazivProjekta}, Zaposleni: {zp.Zaposleni}, Rok izrade: {zp.RokIzrade}, " +
+                                                    $"Prioritet: {zp.prioritet},  Stanje: {zp.stanje}");
+                                            }
+                                        }
+
+                                        else if (opcija == 2)
+                                        {
+                                            Console.WriteLine($"Šaljem listu od {projekti.Count} projekata...");
+
+                                            try
+                                            {
+                                                using (MemoryStream ms = new MemoryStream())
+                                                {
+                                                    BinaryFormatter formatter = new BinaryFormatter();
+                                                    formatter.Serialize(ms, projekti);
+                                                    byte[] data = ms.ToArray();
+
+                                                    // Prvo pošalji dužinu podataka
+                                                    byte[] lengthBytes = BitConverter.GetBytes(data.Length);
+                                                    client.Send(lengthBytes);
+
+                                                    // Zatim pošalji podatke
+                                                    int totalSent = 0;
+                                                    while (totalSent < data.Length)
+                                                    {
+                                                        int sent = client.Send(data, totalSent, data.Length - totalSent, SocketFlags.None);
+                                                        totalSent += sent;
+                                                    }
+
+                                                    Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Console.WriteLine($"Greška pri serijalizaciji liste: {ex.Message}");
+                                            }
+                                        }
+                                        else if (opcija == 0)
+                                        {
+                                            Console.WriteLine($"Klijent {client.RemoteEndPoint} izlazi");
+                                            clientsToRemove.Add(client);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Nevalidna opcija primljena: '{message}'");
+                                    }
                                 }
                             }
+
                             catch (SocketException ex)
                             {
                                 if (ex.SocketErrorCode == SocketError.WouldBlock)

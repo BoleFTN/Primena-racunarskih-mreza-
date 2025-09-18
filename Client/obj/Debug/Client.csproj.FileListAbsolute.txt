@@ -22,3 +22,13 @@ D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
 D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.csproj.Up2Date
 D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.exe
 D:\PROJEKAT_MREZE4\Client\obj\Debug\Client.pdb
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\bin\Debug\Client.exe.config
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\bin\Debug\Client.exe
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\bin\Debug\Client.pdb
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\bin\Debug\Biblioteka.dll
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\bin\Debug\Biblioteka.pdb
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\obj\Debug\Client.csproj.AssemblyReference.cache
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\obj\Debug\Client.csproj.Up2Date
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\obj\Debug\Client.exe
+C:\Users\HP\Desktop\PROJEKAT_MREZE7\Client\obj\Debug\Client.pdb
