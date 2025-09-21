@@ -1,11 +1,11 @@
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Server.exe.config
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Server.exe
-D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Server.pdb
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Biblioteka.dll
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Biblioteka.pdb
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.exe.config
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.csproj.Up2Date
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.exe
 D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.pdb
-D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\obj\Debug\Server.exe.config
+D:\Fax\Kolokvijumi i cuda za fax\3 god\1 semestar\Mreze\projekat\Server\bin\Debug\Server.pdb

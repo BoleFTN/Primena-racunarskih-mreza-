@@ -16,23 +16,23 @@ namespace Menadzer
     public class Menadzer
     {
         static List<ZadatakProjekta> projekti;
-        
+
         static void Main(string[] args)
         {
             Console.WriteLine("Menadžer kreće sa radom...");
             Thread.Sleep(3000);
-            
+
             Socket UDPmenadzerSocket = null;
             Socket TCPmenadzerSocket = null;
-            
+
             try
             {
                 UDPmenadzerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 IPEndPoint UDPdestinationEP = new IPEndPoint(IPAddress.Loopback, 27015);
                 EndPoint serverEP = new IPEndPoint(IPAddress.Any, 0);
-                
+
                 string ImeMenadzera = "";
-                
+
                 if (File.Exists("Menadzer.txt"))
                 {
                     ImeMenadzera = File.ReadAllText("Menadzer.txt").Trim();
@@ -51,10 +51,10 @@ namespace Menadzer
                 }
 
                 Console.WriteLine($"Šaljem ime '{ImeMenadzera}' serveru...");
-                
+
                 // Pošalji ime serveru preko UDP-a
                 byte[] enkriptovanaPoruka = Encoding.UTF8.GetBytes(ImeMenadzera);
-                int slanje = UDPmenadzerSocket.SendTo(enkriptovanaPoruka,UDPdestinationEP);
+                int slanje = UDPmenadzerSocket.SendTo(enkriptovanaPoruka, UDPdestinationEP);
                 Console.WriteLine("Poslano ime serveru preko UDP-a");
 
                 // Prima TCP port od servera
@@ -63,12 +63,12 @@ namespace Menadzer
                 string poruka_o_tcp_uticnici = Encoding.UTF8.GetString(prijemniBuffer, 0, brBajta);
                 Console.WriteLine($"Primljen TCP port: {poruka_o_tcp_uticnici}");
 
-               
+
 
                 // Uspostavi TCP vezu sa serverom
                 TCPmenadzerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IPEndPoint TCPserverEP = new IPEndPoint(IPAddress.Loopback, int.Parse(poruka_o_tcp_uticnici));
-                
+
                 Console.WriteLine("Povezujem se sa TCP serverom...");
                 TCPmenadzerSocket.Connect(TCPserverEP);
                 Console.WriteLine("Uspešno povezan sa TCP serverom!");
@@ -83,7 +83,7 @@ namespace Menadzer
                     Console.WriteLine("2 - Izlistajte projekte");
                     Console.WriteLine(new string('=', 40));
                     Console.Write("Vaš izbor: ");
-                    
+
                     if (!int.TryParse(Console.ReadLine(), out opcija))
                     {
                         Console.WriteLine("Nevalidna opcija!");
@@ -92,7 +92,7 @@ namespace Menadzer
 
                     // Pošalji opciju serveru
                     byte[] opcijaBinarno = Encoding.UTF8.GetBytes(opcija.ToString());
-                    TCPmenadzerSocket.SendTo(opcijaBinarno, UDPdestinationEP);
+                    TCPmenadzerSocket.Send(opcijaBinarno);
                     Console.WriteLine($"Poslana opcija {opcija}");
 
                     if (opcija == 1)
@@ -112,7 +112,8 @@ namespace Menadzer
                             Zaposleni = imeZaposlenog,
                             RokIzrade = rokIzrade,
                             prioritet = prioritet,
-                            stanje = StanjeProjekta.naCekanju
+                            stanje = StanjeProjekta.naCekanju,
+                            Komentar = ""
                         };
                         using (MemoryStream ms = new MemoryStream())
                         {
@@ -126,7 +127,7 @@ namespace Menadzer
                     {
                         // Prima listu projekata
                         Console.WriteLine("Zahtevam listu projekata...");
-                        
+
                         try
                         {
                             // Prvo primi dužinu podataka (4 bajta)
@@ -137,41 +138,41 @@ namespace Menadzer
                                 int received = TCPmenadzerSocket.Receive(lengthBuffer, lengthReceived, 4 - lengthReceived, SocketFlags.None);
                                 lengthReceived += received;
                             }
-                            
+
                             int dataLength = BitConverter.ToInt32(lengthBuffer, 0);
                             Console.WriteLine($"Očekujem {dataLength} bajtova podataka...");
-                            
+
                             // Prima podatke u blokovima
                             List<byte> allData = new List<byte>();
                             byte[] buffer = new byte[1024];
-                            
+
                             while (allData.Count < dataLength)
                             {
                                 int remaining = dataLength - allData.Count;
                                 int toReceive = Math.Min(buffer.Length, remaining);
-                                
+
                                 int received = TCPmenadzerSocket.Receive(buffer, 0, toReceive, SocketFlags.None);
-                                
+
                                 for (int i = 0; i < received; i++)
                                 {
                                     allData.Add(buffer[i]);
                                 }
-                                
+
                                 Console.WriteLine($"Primljeno {received} bajtova (ukupno: {allData.Count}/{dataLength})");
                             }
-                            
+
                             // Deserijalizuj listu
                             using (MemoryStream ms = new MemoryStream(allData.ToArray()))
                             {
                                 BinaryFormatter formatter = new BinaryFormatter();
                                 projekti = (List<ZadatakProjekta>)formatter.Deserialize(ms);
                             }
-                            
+
                             // Prikaži listu
                             Console.WriteLine("\n" + new string('*', 50));
                             Console.WriteLine("             LISTA PROJEKATA");
                             Console.WriteLine(new string('*', 50));
-                            
+
                             if (projekti == null || projekti.Count == 0)
                             {
                                 Console.WriteLine("Nema projekata u sistemu.");
@@ -187,6 +188,9 @@ namespace Menadzer
                                     Console.WriteLine($"  Rok izrade: {zp.RokIzrade}");
                                     Console.WriteLine($"  Prioritet: {zp.prioritet}");
                                     Console.WriteLine($"  Stanje: {zp.stanje}");
+                                    if (zp.stanje != StanjeProjekta.uIzradi && zp.Komentar != "") { 
+                                    Console.WriteLine($"Zaposleni{zp.Zaposleni} je ostavio komentar {zp.Komentar} na projektu {zp.NazivProjekta}");
+                                    }
                                     Console.WriteLine("  " + new string('-', 40));
                                 }
                                 Console.WriteLine($"\nUkupno projekata: {projekti.Count}");
@@ -224,9 +228,9 @@ namespace Menadzer
                 // Očisti resurse
                 try { TCPmenadzerSocket.Close(); } catch { }
                 try { UDPmenadzerSocket.Close(); } catch { }
-               
+
             }
-            
+
             Console.WriteLine("\nPritisnite bilo koji taster za izlaz...");
             Console.ReadKey();
         }

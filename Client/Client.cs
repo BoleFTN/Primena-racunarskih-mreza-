@@ -99,9 +99,8 @@ namespace Client
                 string poruka_o_tcp_uticnici = Encoding.UTF8.GetString(prijemniBuffer, 0, brBajta);
                 Console.WriteLine($"Primljen TCP port: {poruka_o_tcp_uticnici}");
 
-                // Zatvori UDP socket
-                UDPzaposleniSocket.Close();
-                UDPzaposleniSocket = null;
+                
+                
 
                 // Uspostavi TCP vezu sa serverom
                 TCPzaposleniSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -118,6 +117,8 @@ namespace Client
                     Console.WriteLine("Izaberite opciju:");
                     Console.WriteLine("0->ZAPOSLENI - Izlaz");
                     Console.WriteLine("1->ZAPOSLENI - Lista projekata");
+                    Console.WriteLine("2->ZAPOSLENI - Azuriraj projekat");
+                    Console.WriteLine("3->ZAPOSLENI - Zavrsi projekat");
                     Console.WriteLine(new string('=', 40));
                     Console.Write("Vaš izbor: ");
 
@@ -226,6 +227,32 @@ namespace Client
                         {
                             Console.WriteLine($"Greška pri primanju liste: {ex.Message}");
                         }
+                    }
+                    else if (opcija == "2->ZAPOSLENI") { 
+                        Console.WriteLine("Unesite ime projekta koji ste zavrsili ili zapoceli");
+                        string zavrsenProjekat = Console.ReadLine();
+                        byte[] zavrsenProjekatBinarno = Encoding.UTF8.GetBytes(zavrsenProjekat);
+                        TCPzaposleniSocket.Send(zavrsenProjekatBinarno);
+
+
+                        string komentar = "";
+                        
+                        Console.WriteLine("Zelite li da dodate komentar? \n0 za ne \n1 za da");
+                        string unos = Console.ReadLine();
+                        if (unos == "1")
+                        {
+                            Console.WriteLine("Unesite komentar");
+                            komentar = Console.ReadLine();
+                        }
+                        byte[] komentarBinarno = Encoding.UTF8.GetBytes(komentar);
+                        TCPzaposleniSocket.Send(komentarBinarno);
+                    }
+                    else if (opcija == "3->ZAPOSLENI")
+                    {
+                        Console.WriteLine("Unesite ime projekta koji ste zavrsili");
+                        string zavrsenProjekat = Console.ReadLine();
+                        byte[] zavrsenProjekatBinarno = Encoding.UTF8.GetBytes(zavrsenProjekat);
+                        TCPzaposleniSocket.Send(zavrsenProjekatBinarno);
                     }
                     else if (opcija == "0->ZAPOSLENI")
                     {

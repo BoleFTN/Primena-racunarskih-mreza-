@@ -17,6 +17,7 @@ namespace Biblioteka
         public string Zaposleni { get; set; }
         public string RokIzrade { get; set; }
         public int prioritet { get; set; }
+        public string Komentar { get; set; }
         public StanjeProjekta stanje { get; set; }
     }
 }

@@ -35,6 +35,7 @@ namespace Server
             TCPserverSocket.Blocking = false;
             TCPserverSocket.Listen(5);
 
+
             Console.WriteLine($"UDP Server pokrenut na portu {UDPserverEP.Port}");
             Console.WriteLine($"TCP Server pokrenut na portu {TCPserverEP.Port}");
 
@@ -141,7 +142,9 @@ namespace Server
                         {
                             try
                             {
+                                client.Blocking = true;
                                 byte[] buffer = new byte[1024];
+                                byte[] bufferObj = new byte[1024];
                                 int bytes = client.Receive(buffer);
 
                                 if (bytes == 0)
@@ -153,7 +156,7 @@ namespace Server
 
                                 string message = Encoding.UTF8.GetString(buffer, 0, bytes);
                                 Console.WriteLine($"Primljena poruka: '{message}' od {client.RemoteEndPoint}");
-                                Thread.Sleep(7000);
+                                //Thread.Sleep(7000);
                                 if (message == "1->ZAPOSLENI")
                                 {
                                     Console.WriteLine($"Šaljem listu od {projekti.Count} projekata...");
@@ -178,7 +181,7 @@ namespace Server
                                                 totalSent += sent;
                                             }
 
-                                            Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
+                                            Console.WriteLine($"Lista projekata poslata ({data.Length} bajtova)");
                                         }
 
                                     }
@@ -187,6 +190,41 @@ namespace Server
                                         Console.WriteLine($"Greška pri serijalizaciji liste: {ex.Message}");
                                     }
                                 }
+                                else if (message == "2->ZAPOSLENI") { 
+                                    int brBajtaObjekat = client.Receive(buffer);
+                                    string imeProjekta = Encoding.UTF8.GetString(buffer, 0, brBajtaObjekat);
+                                    foreach (ZadatakProjekta zp in projekti) {
+                                        if (zp.NazivProjekta == imeProjekta) {
+                                            if (zp.stanje == StanjeProjekta.naCekanju) zp.stanje = StanjeProjekta.uIzradi;
+                                            else if (zp.stanje == StanjeProjekta.uIzradi) zp.stanje = StanjeProjekta.zavrseno;
+                                            Console.WriteLine($"Promenjen status projekta {zp.NazivProjekta} na {zp.stanje}");
+                                        }
+                                    }
+                                    int brBajtaKomentar = client.Receive(buffer);
+                                    string komentar = Encoding.UTF8.GetString(buffer, 0, brBajtaKomentar);
+                                    foreach (ZadatakProjekta zp in projekti)
+                                    {
+                                        if (zp.NazivProjekta == imeProjekta)
+                                        {
+                                           zp.Komentar = komentar;
+                                        }
+                                    }
+                                }
+
+                                else if (message == "3->ZAPOSLENI")
+                                {
+                                    int brBajtaObjekat = client.Receive(buffer);
+                                    string imeProjekta = Encoding.UTF8.GetString(buffer, 0, brBajtaObjekat);
+                                    foreach (ZadatakProjekta zp in projekti)
+                                    {
+                                        if (zp.NazivProjekta == imeProjekta && zp.stanje == StanjeProjekta.uIzradi)
+                                        {
+                                            zp.stanje = StanjeProjekta.zavrseno;
+                                            Console.WriteLine($"Projekat {zp.NazivProjekta} je uspesno zavrsen");
+                                        }
+                                    }
+                                }
+
                                 else if (message == "0->ZAPOSLENI")
                                 {
                                     Console.WriteLine($"Klijent {client.RemoteEndPoint} izlazi");
@@ -203,8 +241,8 @@ namespace Server
                                             Console.WriteLine("Server prima projekat od menadzera");
 
                                             // primi objekat
-                                            int brBajtaObjekat = client.Receive(buffer);
-                                            using (MemoryStream ms = new MemoryStream(buffer, 0, brBajtaObjekat))
+                                            int brBajtaObjekat = client.Receive(bufferObj);
+                                            using (MemoryStream ms = new MemoryStream(bufferObj, 0, brBajtaObjekat))
                                             {
                                                 BinaryFormatter formatter = new BinaryFormatter();
                                                 ZadatakProjekta zp = (ZadatakProjekta)formatter.Deserialize(ms);
@@ -239,7 +277,7 @@ namespace Server
                                                         totalSent += sent;
                                                     }
 
-                                                    Console.WriteLine($"✓ Lista projekata poslata ({data.Length} bajtova)");
+                                                    Console.WriteLine($"Lista projekata poslata ({data.Length} bajtova)");
                                                 }
                                             }
                                             catch (Exception ex)
@@ -285,12 +323,7 @@ namespace Server
                         }
                     }
 
-                    // Ukloni diskonektovane klijente
-                    foreach (Socket client in clientsToRemove)
-                    {
-                        tcpClients.Remove(client);
-                        try { client.Close(); } catch { }
-                    }
+
                 }
                 catch (Exception ex)
                 {
